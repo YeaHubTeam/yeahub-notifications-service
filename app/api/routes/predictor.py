@@ -2,18 +2,18 @@ import json
 from pathlib import Path
 
 import joblib
-from core.config import INPUT_EXAMPLE
+from app.core.config import INPUT_EXAMPLE
 from fastapi import APIRouter, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from loguru import logger
-from db import SessionLocal
-from models.log import RequestLog
-from models.prediction import (
+from app.db import SessionLocal
+from app.models.log import RequestLog
+from app.models.prediction import (
     HealthResponse,
     MachineLearningDataInput,
     MachineLearningResponse,
 )
-from services.predict import MachineLearningModelHandlerScore as model
+from app.services.predict import MachineLearningModelHandlerScore as model
 
 router = APIRouter()
 

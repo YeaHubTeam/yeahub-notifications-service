@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-import services.predict as predict
+import app.services.predict as predict
 
 
 class DummyModel:

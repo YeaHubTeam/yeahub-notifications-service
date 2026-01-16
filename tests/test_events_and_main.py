@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from sqlalchemy.exc import OperationalError
 
-from core import events
+from app.core import events
 from main import get_application
-import services.predict as predict
+import app.services.predict as predict
 
 
 def test_preload_model(monkeypatch):

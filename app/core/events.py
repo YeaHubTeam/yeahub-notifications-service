@@ -2,10 +2,10 @@ from typing import Callable
 from fastapi import FastAPI
 from loguru import logger
 from sqlalchemy.exc import OperationalError
-from db import Base, engine
+from app.db import Base, engine
 
 # Если MEMOIZATION_FLAG всё равно нужен в коде
-from core.config import MEMOIZATION_FLAG
+from app.core.config import MEMOIZATION_FLAG
 
 def preload_model():
     """

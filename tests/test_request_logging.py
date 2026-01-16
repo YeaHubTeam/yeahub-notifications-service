@@ -4,10 +4,10 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from api.routes import predictor
-from db import Base
-from models.log import RequestLog
-from models.prediction import MachineLearningDataInput
+from app.api.routes import predictor
+from app.db import Base
+from app.models.log import RequestLog
+from app.models.prediction import MachineLearningDataInput
 
 
 @pytest.fixture
