@@ -131,3 +131,4 @@ Deploying inference service to AWS Lambda
 
 Made by <https://github.com/arthurhenrique/cookiecutter-fastapi/graphs/contributors> with ❤️
 # yeahub-notifications-service
+# yeahub-notifications-service
