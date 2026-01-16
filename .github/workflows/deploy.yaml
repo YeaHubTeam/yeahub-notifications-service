@@ -1,0 +1,66 @@
+name: Deploy Notifications
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+env:
+  REGISTRY: cr.selcloud.ru/yeahub-registry
+  IMAGE_NAME: yeahub-notifications
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref == 'refs/heads/develop' && 'deploy-develop' || github.run_id }}
+      cancel-in-progress: ${{ github.ref == 'refs/heads/develop' && true || false }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set IMAGE_TAG
+        run: |
+          if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+            IMAGE_TAG="develop-${GITHUB_SHA::7}"
+          else
+            # Для prod можно брать pyproject.toml version
+            IMAGE_TAG=$(python3 -c "import toml; print(toml.load('pyproject.toml')['tool']['poetry']['version'])")
+          fi
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Docker login
+        run: |
+          echo ${{ secrets.REGISTRY_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+      - name: Build & Push Notifications image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
+
+      - name: Checkout Helm repo
+        uses: actions/checkout@v3
+        with:
+          repository: YeaHubTeam/yeahub-helm
+          ref: ${{ github.ref == 'refs/heads/main' && 'main' || 'develop' }}
+          token: ${{ secrets.HELM_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+          path: helm
+
+      - name: Update Helm values and push
+        run: |
+          cd helm
+          if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+            HELM_FILE="values-test.yaml"
+          else
+            HELM_FILE="values-prod.yaml"
+          fi
+
+          yq eval ".notificationsService.tag = \"${IMAGE_TAG}\"" -i $HELM_FILE
+
+          git config --global user.email "ci@github.com"
+          git config --global user.name "github-actions"
+          git add $HELM_FILE
+          git commit -m "Update notifications=${IMAGE_TAG}" || echo "No changes"
+          git push https://x-access-token:${{ secrets.HELM_REPO_TOKEN }}@github.com/YeaHubTeam/yeahub-helm.git ${{ github.ref == 'refs/heads/main' && 'main' || 'develop' }}
