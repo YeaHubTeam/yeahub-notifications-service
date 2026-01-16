@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: cr.selcloud.ru/yeahub-registry
-  IMAGE_NAME: yeahub-notifications
+  IMAGE_NAME: yeahub-notifications-service
 
 jobs:
   build:
